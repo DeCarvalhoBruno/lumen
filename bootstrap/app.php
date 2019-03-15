@@ -1,40 +1,22 @@
 <?php
 
-require_once __DIR__.'/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 (new Laravel\Lumen\Bootstrap\LoadEnvironmentVariables(
     dirname(__DIR__)
 ))->bootstrap();
 
-/*
-|--------------------------------------------------------------------------
-| Create The Application
-|--------------------------------------------------------------------------
-|
-| Here we will load the environment and create the application instance
-| that serves as the central piece of this framework. We'll use this
-| application as an "IoC" container and router for this framework.
-|
-*/
+//$app = new Laravel\Lumen\Application(
+//    dirname(__DIR__)
+//);
 
-$app = new Laravel\Lumen\Application(
+$app = new \App\Application(
     dirname(__DIR__)
 );
 
 // $app->withFacades();
 
 // $app->withEloquent();
-
-/*
-|--------------------------------------------------------------------------
-| Register Container Bindings
-|--------------------------------------------------------------------------
-|
-| Now we will register a few bindings in the service container. We will
-| register the exception handler and the console kernel. You may add
-| your own bindings here if you like or you can make another file.
-|
-*/
 
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
@@ -46,37 +28,20 @@ $app->singleton(
     App\Console\Kernel::class
 );
 
-/*
-|--------------------------------------------------------------------------
-| Register Middleware
-|--------------------------------------------------------------------------
-|
-| Next, we will register the middleware with the application. These can
-| be global middleware that run before and after each request into a
-| route or middleware that'll be assigned to some specific routes.
-|
-*/
-
-// $app->middleware([
-//     App\Http\Middleware\ExampleMiddleware::class
-// ]);
-
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
-
-/*
-|--------------------------------------------------------------------------
-| Register Service Providers
-|--------------------------------------------------------------------------
-|
-| Here we will register all of the application's service providers which
-| are used to bind services into the container. Service providers are
-| totally optional, so you are not required to uncomment this line.
-|
-*/
-
-// $app->register(App\Providers\AppServiceProvider::class);
+$app->register(Naraki\Elasticsearch\LumenServiceProvider::class);
+$app->register(Barryvdh\Cors\ServiceProvider::class);
+$app->make('config')->set('cors', [
+    'supportsCredentials' => false,
+    'allowedOrigins' => explode(',',env('CORS_ALLOWED_ORIGINS')),
+    'allowedOriginsPatterns' => [],
+    'allowedHeaders' => ['*'],
+    'allowedMethods' => ['POST'],
+    'exposedHeaders' => [],
+    'maxAge' => 0,
+]);
+$app->middleware([
+    'cors' => \Barryvdh\Cors\HandleCors::class,
+]);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
@@ -90,11 +55,11 @@ $app->singleton(
 | can respond to, as well as the controllers that may handle them.
 |
 */
-
-$app->router->group([
-    'namespace' => 'App\Http\Controllers',
-], function ($router) {
-    require __DIR__.'/../routes/web.php';
-});
+//
+//$app->router->group([
+//    'namespace' => 'App\Http\Controllers',
+//], function ($router) {
+//    require __DIR__.'/../routes/web.php';
+//});
 
 return $app;
